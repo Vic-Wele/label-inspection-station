@@ -1,0 +1,31 @@
+label_id,intended_class,lot,sheet,position,note
+PKG-0001,good,2610-A,1,1,print normally
+PKG-0002,good,2610-B,1,2,print normally
+PKG-0003,good,2610-C,1,3,print normally
+PKG-0004,good,2610-D,1,4,print normally
+PKG-0005,good,2610-E,1,5,print normally
+PKG-0006,good,2610-A,1,6,print normally
+PKG-0007,good,2610-B,2,1,print normally
+PKG-0008,good,2610-C,2,2,print normally
+PKG-0009,good,2610-D,2,3,print normally
+PKG-0010,good,2610-E,2,4,print normally
+PKG-0011,good,2610-A,2,5,print normally
+PKG-0012,good,2610-B,2,6,print normally
+PKG-0013,good,2610-C,3,1,print normally
+PKG-0014,good,2610-D,3,2,print normally
+PKG-0015,good,2610-E,3,3,print normally
+PKG-0016,good,2610-A,3,4,print normally
+PKG-0017,good,2610-B,3,5,print normally
+PKG-0018,good,2610-C,3,6,print normally
+PKG-0019,good,2610-D,4,1,print normally
+PKG-0020,good_for_hand_defect,2610-E,4,2,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0021,good_for_hand_defect,2610-A,4,3,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0022,good_for_hand_defect,2610-B,4,4,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0023,good_for_hand_defect,2610-C,4,5,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0024,good_for_hand_defect,2610-D,4,6,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0025,good_for_hand_defect,2610-E,5,1,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0026,good_for_hand_defect,2610-A,5,2,"tear (20-22), smudge (23-24), scratch barcode (25-26)"
+PKG-0027,faded,2610-B,5,3,printed faded
+PKG-0028,faded,2610-C,5,4,printed faded
+PKG-0029,damaged_barcode,2610-D,5,5,printed with gaps in bars
+PKG-0030,damaged_barcode,2610-E,5,6,printed with gaps in bars
