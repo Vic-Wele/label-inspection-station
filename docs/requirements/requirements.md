@@ -14,7 +14,7 @@ Automatically inspect printed labels on small boxes, reject defective boxes, and
 - Logging and a live dashboard
 
 **Excluded**
-- A motorized conveyor (boxes are moved by hand or slide down a chute)
+- A motorized conveyor (boxes are placed by hand into a fixed nest)
 - Integration with a real factory MES or ERP system
 - Safety-rated guarding (not needed for this low-power demo)
 
