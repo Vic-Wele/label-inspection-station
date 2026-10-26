@@ -9,7 +9,7 @@ flowchart LR
     PLC -->|"Modbus RTU over USB: trigger"| PC["Vision PC (laptop)"]
     Cam["USB camera + ring light"] -->|"Image"| PC
     PC -->|"Modbus RTU over USB: pass/fail"| PLC
-    PLC -->|"Servo signal"| Servo["Reject arm (servo)"]
+    PLC -->|"Servo + LED outputs"| Servo["Reject flag + red/green stack light"]
     PC --> Log["Results log + images"]
     Log --> Drive["Google Drive backup"]
     Log --> Train["Model training (laptop)"]
@@ -24,7 +24,7 @@ flowchart LR
 3. The vision PC reads the flag over Modbus and takes a picture.
 4. The vision PC runs the checks and the AI model, then reads the barcode.
 5. The vision PC writes **pass** or **fail** back to the PLC.
-6. On fail, the PLC fires the reject arm, which pushes the box out of the nest.
+6. On fail, the PLC raises the reject flag and turns on the red light. On pass, it turns on the green light.
 7. The result, image and timing are logged and shown on the dashboard.
 
 ## Design decisions
@@ -49,5 +49,5 @@ flowchart LR
 | Modbus RTU | PLC communication | EtherNet/IP or PROFINET |
 | Training on the laptop | Model training | SICK dStudio (cloud training at scale) |
 | Model running on the laptop | Inference at the edge | AI inference running on the SICK sensor |
-| Servo reject arm | Removes bad parts | Pneumatic pusher or diverter |
+| Servo reject flag + red/green LEDs | Signals a rejected parcel | Stack light at the station, diverter downstream |
 | Streamlit dashboard | Monitoring | Plant dashboard via OPC UA or MQTT |
