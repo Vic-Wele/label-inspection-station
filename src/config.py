@@ -14,7 +14,7 @@ CAMERA_SETTINGS = [
     ("autofocus off", cv2.CAP_PROP_AUTOFOCUS, 0),
     ("focus", cv2.CAP_PROP_FOCUS, 68),
     ("auto exposure off", cv2.CAP_PROP_AUTO_EXPOSURE, 0.25),
-    ("exposure", cv2.CAP_PROP_EXPOSURE, -5),
+    ("exposure", cv2.CAP_PROP_EXPOSURE, -7),
     ("auto white balance off", cv2.CAP_PROP_AUTO_WB, 0),
     ("white balance", cv2.CAP_PROP_WB_TEMPERATURE, 6500),
     ("brightness", cv2.CAP_PROP_BRIGHTNESS, 105),
