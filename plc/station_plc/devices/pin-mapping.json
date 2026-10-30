@@ -1,0 +1,10 @@
+{
+  "Arduino Uno": [
+    {
+      "pin": "13",
+      "pinType": "digitalOutput",
+      "address": "%QX0.0",
+      "alias": "LED_TEST"
+    }
+  ]
+}

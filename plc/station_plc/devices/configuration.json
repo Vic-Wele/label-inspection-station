@@ -1,0 +1,18 @@
+{
+  "deviceBoard": "Arduino Uno",
+  "communicationPort": "COM4",
+  "runtimeIpAddress": "",
+  "vendorScreenData": {},
+  "vendorScreenDataByBoard": {
+    "OpenPLC Simulator": {}
+  },
+  "selectedPlatformOptions": {},
+  "vppPackagePinsByBoard": {
+    "Arduino Uno": {
+      "packageId": "com.openplc.arduino",
+      "version": "2.1.0",
+      "contentHash": "sha256:016922760f74d300f130f622cbcf93cb78ff6173db26f0f6bf4c7e090b471018"
+    }
+  },
+  "persistentStorageByBoard": {}
+}
