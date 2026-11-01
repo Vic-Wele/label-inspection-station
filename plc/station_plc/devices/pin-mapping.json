@@ -5,6 +5,18 @@
       "pinType": "digitalOutput",
       "address": "%QX0.0",
       "alias": "LED_TEST"
+    },
+    {
+      "pin": "7",
+      "pinType": "digitalOutput",
+      "address": "%QX0.1",
+      "alias": "GREEN_LIGHT"
+    },
+    {
+      "pin": "8",
+      "pinType": "digitalOutput",
+      "address": "%QX0.2",
+      "alias": "RED_LIGHT"
     }
   ]
 }
