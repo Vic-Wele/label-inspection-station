@@ -1,6 +1,12 @@
 {
   "Arduino Uno": [
     {
+      "pin": "2",
+      "pinType": "digitalInput",
+      "address": "%IX0.0",
+      "alias": "BEAM_SENSOR"
+    },
+    {
       "pin": "13",
       "pinType": "digitalOutput",
       "address": "%QX0.0",

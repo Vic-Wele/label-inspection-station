@@ -3,6 +3,7 @@ PROGRAM main
     led_out : BOOL AT %QX0.0;
     green_out : BOOL AT %QX0.1;
     red_out : BOOL AT %QX0.2;
+    beam_clear : BOOL AT %IX0.0;
   END_VAR
 
 {
@@ -370,7 +371,7 @@ PROGRAM main
         100
       ],
       "reactFlowViewport": [
-        300,
+        323,
         120
       ],
       "nodes": [
@@ -463,8 +464,8 @@ PROGRAM main
           "dragging": false
         },
         {
-          "id": "COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa",
-          "type": "coil",
+          "id": "CONTACT_54f98e76-092b-4e25-8b69-c697f5c0778e",
+          "type": "contact",
           "position": {
             "x": 68,
             "y": 38
@@ -490,11 +491,11 @@ PROGRAM main
               },
               {
                 "glbPosition": {
-                  "x": 96,
+                  "x": 92,
                   "y": 50
                 },
                 "relPosition": {
-                  "x": 28,
+                  "x": 24,
                   "y": 12
                 },
                 "id": "output",
@@ -529,11 +530,11 @@ PROGRAM main
             "outputHandles": [
               {
                 "glbPosition": {
-                  "x": 96,
+                  "x": 92,
                   "y": 50
                 },
                 "relPosition": {
-                  "x": 28,
+                  "x": 24,
                   "y": 12
                 },
                 "id": "output",
@@ -564,7 +565,153 @@ PROGRAM main
             },
             "outputConnector": {
               "glbPosition": {
-                "x": 96,
+                "x": 92,
+                "y": 50
+              },
+              "relPosition": {
+                "x": 24,
+                "y": 12
+              },
+              "id": "output",
+              "position": "right",
+              "isConnectable": false,
+              "type": "source",
+              "style": {
+                "right": -3
+              }
+            },
+            "numericId": "9738966",
+            "variable": {
+              "id": "",
+              "name": "beam_clear",
+              "type": {
+                "definition": "base-type",
+                "value": "BOOL"
+              },
+              "class": "local",
+              "location": "",
+              "documentation": "",
+              "debug": false
+            },
+            "executionOrder": 0,
+            "draggable": true,
+            "selectable": true,
+            "deletable": true
+          },
+          "width": 24,
+          "height": 24,
+          "measured": {
+            "width": 24,
+            "height": 24
+          },
+          "draggable": true,
+          "selectable": true,
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa",
+          "type": "coil",
+          "position": {
+            "x": 182,
+            "y": 38
+          },
+          "data": {
+            "handles": [
+              {
+                "glbPosition": {
+                  "x": 182,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 0,
+                  "y": 12
+                },
+                "id": "input",
+                "position": "left",
+                "isConnectable": false,
+                "type": "target",
+                "style": {
+                  "left": -3
+                }
+              },
+              {
+                "glbPosition": {
+                  "x": 210,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 28,
+                  "y": 12
+                },
+                "id": "output",
+                "position": "right",
+                "isConnectable": false,
+                "type": "source",
+                "style": {
+                  "right": -3
+                }
+              }
+            ],
+            "variant": "default",
+            "inputHandles": [
+              {
+                "glbPosition": {
+                  "x": 182,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 0,
+                  "y": 12
+                },
+                "id": "input",
+                "position": "left",
+                "isConnectable": false,
+                "type": "target",
+                "style": {
+                  "left": -3
+                }
+              }
+            ],
+            "outputHandles": [
+              {
+                "glbPosition": {
+                  "x": 210,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 28,
+                  "y": 12
+                },
+                "id": "output",
+                "position": "right",
+                "isConnectable": false,
+                "type": "source",
+                "style": {
+                  "right": -3
+                }
+              }
+            ],
+            "inputConnector": {
+              "glbPosition": {
+                "x": 182,
+                "y": 50
+              },
+              "relPosition": {
+                "x": 0,
+                "y": 12
+              },
+              "id": "input",
+              "position": "left",
+              "isConnectable": false,
+              "type": "target",
+              "style": {
+                "left": -3
+              }
+            },
+            "outputConnector": {
+              "glbPosition": {
+                "x": 210,
                 "y": 50
               },
               "relPosition": {
@@ -612,7 +759,7 @@ PROGRAM main
           "id": "right-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf",
           "type": "powerRail",
           "position": {
-            "x": 297,
+            "x": 320,
             "y": 30
           },
           "data": {
@@ -634,7 +781,7 @@ PROGRAM main
                   "top": 20,
                   "left": -3
                 },
-                "x": 297
+                "x": 320
               }
             ],
             "inputHandles": [
@@ -700,18 +847,25 @@ PROGRAM main
       ],
       "edges": [
         {
-          "id": "e_left-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf_COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa__left-rail_input",
-          "source": "left-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf",
-          "target": "COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa",
-          "sourceHandle": "left-rail",
-          "targetHandle": "input"
-        },
-        {
           "id": "e_COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa_right-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf__output_right-rail",
           "source": "COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa",
           "target": "right-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf",
           "sourceHandle": "output",
           "targetHandle": "right-rail"
+        },
+        {
+          "id": "e_left-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf_CONTACT_54f98e76-092b-4e25-8b69-c697f5c0778e__left-rail_input",
+          "source": "left-rail-rung_main_559da0e0-94ce-4369-9541-a27f30fc03cf",
+          "target": "CONTACT_54f98e76-092b-4e25-8b69-c697f5c0778e",
+          "sourceHandle": "left-rail",
+          "targetHandle": "input"
+        },
+        {
+          "id": "e_CONTACT_54f98e76-092b-4e25-8b69-c697f5c0778e_COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa__output_input",
+          "source": "CONTACT_54f98e76-092b-4e25-8b69-c697f5c0778e",
+          "target": "COIL_b59746b1-83d7-4a91-a966-2ae7dfbce4fa",
+          "sourceHandle": "output",
+          "targetHandle": "input"
         }
       ],
       "selectedNodes": []
@@ -724,7 +878,7 @@ PROGRAM main
         100
       ],
       "reactFlowViewport": [
-        300,
+        323,
         120
       ],
       "nodes": [
@@ -817,8 +971,8 @@ PROGRAM main
           "dragging": false
         },
         {
-          "id": "COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741",
-          "type": "coil",
+          "id": "CONTACT_77d5cd60-b61e-436f-8cc4-863f28585fab",
+          "type": "contact",
           "position": {
             "x": 68,
             "y": 38
@@ -844,11 +998,11 @@ PROGRAM main
               },
               {
                 "glbPosition": {
-                  "x": 96,
+                  "x": 92,
                   "y": 50
                 },
                 "relPosition": {
-                  "x": 28,
+                  "x": 24,
                   "y": 12
                 },
                 "id": "output",
@@ -860,7 +1014,7 @@ PROGRAM main
                 }
               }
             ],
-            "variant": "default",
+            "variant": "negated",
             "inputHandles": [
               {
                 "glbPosition": {
@@ -883,11 +1037,11 @@ PROGRAM main
             "outputHandles": [
               {
                 "glbPosition": {
-                  "x": 96,
+                  "x": 92,
                   "y": 50
                 },
                 "relPosition": {
-                  "x": 28,
+                  "x": 24,
                   "y": 12
                 },
                 "id": "output",
@@ -918,7 +1072,153 @@ PROGRAM main
             },
             "outputConnector": {
               "glbPosition": {
-                "x": 96,
+                "x": 92,
+                "y": 50
+              },
+              "relPosition": {
+                "x": 24,
+                "y": 12
+              },
+              "id": "output",
+              "position": "right",
+              "isConnectable": false,
+              "type": "source",
+              "style": {
+                "right": -3
+              }
+            },
+            "numericId": "5654292",
+            "variable": {
+              "id": "",
+              "name": "beam_clear",
+              "type": {
+                "definition": "base-type",
+                "value": "BOOL"
+              },
+              "class": "local",
+              "location": "",
+              "documentation": "",
+              "debug": false
+            },
+            "executionOrder": 0,
+            "draggable": true,
+            "selectable": true,
+            "deletable": true
+          },
+          "width": 24,
+          "height": 24,
+          "measured": {
+            "width": 24,
+            "height": 24
+          },
+          "draggable": true,
+          "selectable": true,
+          "selected": false,
+          "dragging": false
+        },
+        {
+          "id": "COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741",
+          "type": "coil",
+          "position": {
+            "x": 182,
+            "y": 38
+          },
+          "data": {
+            "handles": [
+              {
+                "glbPosition": {
+                  "x": 182,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 0,
+                  "y": 12
+                },
+                "id": "input",
+                "position": "left",
+                "isConnectable": false,
+                "type": "target",
+                "style": {
+                  "left": -3
+                }
+              },
+              {
+                "glbPosition": {
+                  "x": 210,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 28,
+                  "y": 12
+                },
+                "id": "output",
+                "position": "right",
+                "isConnectable": false,
+                "type": "source",
+                "style": {
+                  "right": -3
+                }
+              }
+            ],
+            "variant": "default",
+            "inputHandles": [
+              {
+                "glbPosition": {
+                  "x": 182,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 0,
+                  "y": 12
+                },
+                "id": "input",
+                "position": "left",
+                "isConnectable": false,
+                "type": "target",
+                "style": {
+                  "left": -3
+                }
+              }
+            ],
+            "outputHandles": [
+              {
+                "glbPosition": {
+                  "x": 210,
+                  "y": 50
+                },
+                "relPosition": {
+                  "x": 28,
+                  "y": 12
+                },
+                "id": "output",
+                "position": "right",
+                "isConnectable": false,
+                "type": "source",
+                "style": {
+                  "right": -3
+                }
+              }
+            ],
+            "inputConnector": {
+              "glbPosition": {
+                "x": 182,
+                "y": 50
+              },
+              "relPosition": {
+                "x": 0,
+                "y": 12
+              },
+              "id": "input",
+              "position": "left",
+              "isConnectable": false,
+              "type": "target",
+              "style": {
+                "left": -3
+              }
+            },
+            "outputConnector": {
+              "glbPosition": {
+                "x": 210,
                 "y": 50
               },
               "relPosition": {
@@ -966,7 +1266,7 @@ PROGRAM main
           "id": "right-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a",
           "type": "powerRail",
           "position": {
-            "x": 297,
+            "x": 320,
             "y": 30
           },
           "data": {
@@ -988,7 +1288,7 @@ PROGRAM main
                   "top": 20,
                   "left": -3
                 },
-                "x": 297
+                "x": 320
               }
             ],
             "inputHandles": [
@@ -1054,18 +1354,25 @@ PROGRAM main
       ],
       "edges": [
         {
-          "id": "e_left-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a_COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741__left-rail_input",
-          "source": "left-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a",
-          "target": "COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741",
-          "sourceHandle": "left-rail",
-          "targetHandle": "input"
-        },
-        {
           "id": "e_COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741_right-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a__output_right-rail",
           "source": "COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741",
           "target": "right-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a",
           "sourceHandle": "output",
           "targetHandle": "right-rail"
+        },
+        {
+          "id": "e_left-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a_CONTACT_77d5cd60-b61e-436f-8cc4-863f28585fab__left-rail_input",
+          "source": "left-rail-rung_main_0541329f-0e1a-46ad-b331-6997ca48674a",
+          "target": "CONTACT_77d5cd60-b61e-436f-8cc4-863f28585fab",
+          "sourceHandle": "left-rail",
+          "targetHandle": "input"
+        },
+        {
+          "id": "e_CONTACT_77d5cd60-b61e-436f-8cc4-863f28585fab_COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741__output_input",
+          "source": "CONTACT_77d5cd60-b61e-436f-8cc4-863f28585fab",
+          "target": "COIL_b737b62e-b995-40b0-9e96-ffcc3bd01741",
+          "sourceHandle": "output",
+          "targetHandle": "input"
         }
       ],
       "selectedNodes": []
