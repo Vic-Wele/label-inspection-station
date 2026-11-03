@@ -6,7 +6,7 @@ import cv2
 import zxingcpp
 
 RAW = Path("data/raw")
-ROI = (380, 980, 650, 1450)  # y0, y1, x0, x1: generous box around the label pocket
+from config import ROI
 
 with open(RAW / "captures.csv") as f:
     rows = [r for r in csv.DictReader(f) if r["class"] == "good"]

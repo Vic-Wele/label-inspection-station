@@ -4,7 +4,7 @@ import zxingcpp
 
 from camera import open_camera
 
-ROI = (380, 980, 650, 1450)  # label pocket: y0, y1, x0, x1
+from config import ROI
 
 cap = open_camera(verbose=False)
 print(f"{'exposure':>8} {'label brightness':>17} {'clipped %':>10} {'barcode':>10}")

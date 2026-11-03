@@ -3,7 +3,7 @@ import cv2
 
 from camera import open_camera
 
-ROI = (380, 980, 650, 1450)  # label pocket area: y0, y1, x0, x1
+from config import ROI
 
 cap = open_camera(verbose=False)
 ok, frame = cap.read()
