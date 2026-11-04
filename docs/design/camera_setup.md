@@ -1,68 +1,66 @@
-# Station Camera and Lighting Setup
+# Camera Setup
 
-## Geometry
+Redone from scratch in November 2026 after switching to the Heyday LED bar light.
 
-| Item | Value |
-| --- | --- |
-| Camera | Logitech C615 USB webcam, 1920 x 1080 |
-| Mounting | Overhead boom arm, lens pointing straight down |
-| Field of view | Whole box top plus a thin black border |
-| Resolution on the part | About 5.6 pixels per mm |
-| Barcode bar width | About 2.3 pixels per bar (reads reliably, about 55-70 ms) |
-| Part handling | Box in a two-wall nest; label card in a four-sided pocket |
+## Hardware
 
-## Lighting
+- Camera: Logitech C615, USB, index 1, 1920 x 1080, MJPG, DirectShow backend
+- Mount: boom-arm tripod, pointing straight down (top and bottom label edges within about 1% in width)
+- Light: Heyday LED bar on its own tripod, upper left, full brightness
+- Station rule: ceiling light OFF during capture and live runs
+- Scale: about 9.2 px per mm (label about 1015 px wide)
 
-| Choice | Reason |
-| --- | --- |
-| Ring light, camera looking through the center | Even light from all sides, few shadows |
-| Ring light at full brightness | Brighter scene allows a short exposure, so images stay sharp |
-| Room lights off or blocked | The station's own light is the only light, so images don't change with the time of day |
+## Locked settings (src/config.py)
 
-## Locked camera settings
+| Setting | Value | Why |
+|---|---|---|
+| Autofocus | Off | Autofocus drifts |
+| Focus | 85 | Sharpest at label height (camera moves in steps of 17; 90 rounds to 85) |
+| Auto exposure | Off | Auto changes brightness from part to part |
+| Exposure | -6 | Brightest setting with 0% clipping and a safe margin (see sweep) |
+| Auto white balance | Off | Fixed response |
+| White balance | 4000 | Fixed; color doesn't matter with saturation 0 |
+| Brightness | 128 | Driver default; sweep done at this value |
+| Contrast | 32 | Driver default; sweep done at this value |
+| Saturation | 0 | Grayscale; labels are black and white |
+| Sharpness | 22 | Driver default; clean edges, no halos |
+| Gain | 28 | Driver default; sweep done at this value |
+| Backlight compensation | 0 | Adjusts to the scene, so it counts as an auto setting |
 
-| Setting | Value | Reason |
-| --- | --- | --- |
-| Focus | 68 (manual) | Sharpest at the label height; autofocus can drift between parts |
-| Exposure | -7 (manual) | Chosen by an exposure sweep (below); auto exposure changes when a white label enters the view |
-| White balance | 6500 (manual) | Fixed color response |
-| Saturation | 0 | Grayscale image; labels are black and white, and many industrial cameras are monochrome |
-| Sharpness | 128 (default) | Higher values add white halos around text, which are camera effects, not real label features |
-| Brightness / contrast / gain | 105 / 58 / 5 | Tuned for clear black-on-white contrast |
-| Low light compensation | Off | An automatic feature that can change brightness without warning |
+Driver panel only (not in config.py): Low Light Compensation OFF. Checked after a power cycle by brightness: 138.1 vs 137.8 before.
 
-## Startup self-check
+Changing brightness, contrast or gain changes the image brightness. If any of them change, redo the exposure sweep.
 
-Every time the station opens the camera, `src/camera.py` applies all settings, reads them back, and prints PASS or FAIL. The station should not inspect parts after a FAIL.
+## Region of interest
 
-## Lessons learned
+ROI = (60, 1040, 330, 1460) as (y0, y1, x0, x1).
 
-- Auto settings looked better in a quick preview, but they change from part to part. Locking everything gives repeatable images.
-- The camera's own preview hid a problem: Low Light Compensation was brightening the image. Turning it off showed the true locked image.
-- More light is better than longer exposure: it keeps images sharp.
+- Set after focus, because changing focus changes the zoom slightly.
+- Card position over 7 re-seats: box x 384 to 1437, y 111 to 992. Always inside the ROI.
+- Hands-off drift test: under 1 px over 3 minutes. Nothing creeps on its own.
+- Check tool: python src/card_position.py
 
-## Exposure sweep (ring light at full brightness, room lights off)
+## Test results
 
-| Exposure | Label brightness | Pure white (clipped) | Barcode |
-| --- | --- | --- | --- |
-| -4 | 217.7 | 78.1% | No read |
-| -5 | 185.2 | 63.8% | Read |
-| -6 | 162.1 | 42.9% | Read |
-| **-7** | **87.6** | **2.8%** | **Read** |
-| -8 | 23.6 | 0.0% | No read |
+Exposure sweep (Heyday full, room lights off):
 
-Clipped pixels hide faint defects such as faded print, so -7 was chosen.
+| Exposure | Label brightness | Clipped % | Barcode |
+|---|---|---|---|
+| -2 | 237.7 | 73.0 | NO READ |
+| -3 | 227.4 | 67.7 | Read |
+| -4 | 211.9 | 55.0 | Read |
+| -5 | 185.5 | 0.0 | Read |
+| -6 | 139.9 | 0.0 | Read (chosen) |
+| -7 | 96.1 | 0.0 | Read |
+| -8 | 70.6 | 0.0 | Read |
+| -9 | 50.2 | 0.0 | Read |
+| -10 | 36.2 | 0.0 | Read |
+| -11 | 28.4 | 0.0 | NO READ |
 
-## Room light sensitivity (exposure -7)
+- Room light test: lights off 138.1, ceiling light on 144.4 (+4.6%, under the 5% limit)
+- Power-cycle test (unplug, replug): self-check PASS, all 9 settings
+- Barcode read (ROI + 2x zoom): 10/10, average 101 ms
 
-| Room lights | Label brightness |
-| --- | --- |
-| Off | 87.3 |
-| On | 90.4 |
+## Previous setup (history only, do not reuse)
 
-Difference: 3.5% (limit 5%). The ring light overpowers room light, so images stay consistent.
-
-## Barcode reading
-
-Reading the full 1920 x 1080 image failed on 57% of good images (bars are about 2 pixels wide).
-Cropping to the label area and enlarging it 2x read 104 of 104 correctly.
+Ring light, focus 68, exposure -7, white balance 6500, brightness 105, contrast 58, gain 5, sharpness 128, saturation 0, backlight 1, ROI (380, 980, 650, 1450), about 5.6 px per mm. Replaced when the light changed.
