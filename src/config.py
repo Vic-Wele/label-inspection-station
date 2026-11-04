@@ -15,20 +15,20 @@ CAMERA_SETTINGS = [
     ("autofocus off", cv2.CAP_PROP_AUTOFOCUS, 0),
     ("auto exposure off", cv2.CAP_PROP_AUTO_EXPOSURE, 0.25),
     ("auto white balance off", cv2.CAP_PROP_AUTO_WB, 0),
-    # ("focus", cv2.CAP_PROP_FOCUS, 68),
-    # ("exposure", cv2.CAP_PROP_EXPOSURE, -7),
-    # ("white balance", cv2.CAP_PROP_WB_TEMPERATURE, 6500),
-    # ("brightness", cv2.CAP_PROP_BRIGHTNESS, 105),
-    # ("contrast", cv2.CAP_PROP_CONTRAST, 58),
-    # ("saturation", cv2.CAP_PROP_SATURATION, 0),
-    # ("sharpness", cv2.CAP_PROP_SHARPNESS, 128),
-    # ("gain", cv2.CAP_PROP_GAIN, 5),
-    # ("backlight comp", cv2.CAP_PROP_BACKLIGHT, 1),
+    ("focus", cv2.CAP_PROP_FOCUS, 85),
+    ("exposure", cv2.CAP_PROP_EXPOSURE, -6),
+    ("white balance", cv2.CAP_PROP_WB_TEMPERATURE, 4000),
+    ("brightness", cv2.CAP_PROP_BRIGHTNESS, 128),
+    ("contrast", cv2.CAP_PROP_CONTRAST, 32),
+    ("saturation", cv2.CAP_PROP_SATURATION, 0),
+    ("sharpness", cv2.CAP_PROP_SHARPNESS, 22),
+    ("gain", cv2.CAP_PROP_GAIN, 28),
+    ("backlight comp", cv2.CAP_PROP_BACKLIGHT, 0),
 ]
 
 # Region of interest around the label pocket: (y0, y1, x0, x1).
 # Not set yet. Find it in step 4i.
-ROI = None
+ROI = (80, 1010, 340, 1450)
 
 # Data (Google Drive backup)
 DATA_DIR = Path("G:/My Drive/label-inspection-data")

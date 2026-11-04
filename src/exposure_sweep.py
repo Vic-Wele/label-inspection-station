@@ -8,7 +8,7 @@ from config import ROI
 
 cap = open_camera(verbose=False)
 print(f"{'exposure':>8} {'label brightness':>17} {'clipped %':>10} {'barcode':>10}")
-for exp in [-4, -5, -6, -7, -8]:
+for exp in range(-2, -12, -1):
     cap.set(cv2.CAP_PROP_EXPOSURE, exp)
     for _ in range(8):  # let the new exposure settle
         cap.read()
