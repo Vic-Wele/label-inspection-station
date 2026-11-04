@@ -28,7 +28,7 @@ CAMERA_SETTINGS = [
 
 # Region of interest around the label pocket: (y0, y1, x0, x1).
 # Not set yet. Find it in step 4i.
-ROI = (80, 1010, 340, 1450)
+ROI = (60, 1040, 330, 1460)
 
 # Data (Google Drive backup)
 DATA_DIR = Path("G:/My Drive/label-inspection-data")
