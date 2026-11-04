@@ -1,6 +1,6 @@
 """Guided image capture: shows which card to place, saves grayscale PNGs, and logs every shot.
 
-Example: python src/capture.py --set good --ids 1-26 --shots 4
+Example: python src/capture.py --set good --ids 1-19 --shots 4
 For a missing label: python src/capture.py --set missing --ids none --shots 5
 """
 import argparse
@@ -11,6 +11,7 @@ from pathlib import Path
 import cv2
 
 from camera import open_camera
+from config import ROI
 
 RAW = Path("data/raw")
 LOG = RAW / "captures.csv"
@@ -26,7 +27,7 @@ def parse_ids(text):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--set", required=True, help="class name, for example good or faded")
-    ap.add_argument("--ids", required=True, help="range like 1-26, or none")
+    ap.add_argument("--ids", required=True, help="range like 1-19, or none")
     ap.add_argument("--shots", type=int, default=4)
     args = ap.parse_args()
 
@@ -48,6 +49,8 @@ def main():
             print("Camera read failed")
             break
         view = cv2.resize(frame, (960, 540))
+        # ROI box (yellow). The preview is half size, so divide by 2.
+        cv2.rectangle(view, (ROI[2] // 2, ROI[0] // 2), (ROI[3] // 2, ROI[1] // 2), (0, 255, 255), 2)
         msg = f"{args.set}: {label_id}  shot {shot}/{args.shots}  ({n + 1}/{len(jobs)})  SPACE=capture  Q=quit"
         cv2.putText(view, msg, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         cv2.imshow("Capture", view)
