@@ -2,9 +2,20 @@
   "deviceBoard": "Arduino Uno",
   "communicationPort": "COM4",
   "runtimeIpAddress": "",
-  "vendorScreenData": {},
+  "vendorScreenData": {
+    "serial": {
+      "baud_rate": "115200",
+      "enable_rs485_en_pin": false
+    }
+  },
   "vendorScreenDataByBoard": {
-    "OpenPLC Simulator": {}
+    "OpenPLC Simulator": {},
+    "Arduino Uno": {
+      "serial": {
+        "baud_rate": "115200",
+        "enable_rs485_en_pin": false
+      }
+    }
   },
   "selectedPlatformOptions": {},
   "vppPackagePinsByBoard": {
@@ -13,6 +24,5 @@
       "version": "2.1.0",
       "contentHash": "sha256:016922760f74d300f130f622cbcf93cb78ff6173db26f0f6bf4c7e090b471018"
     }
-  },
-  "persistentStorageByBoard": {}
+  }
 }
