@@ -1,10 +1,10 @@
-"""PatchCore-style anomaly detection: train on good images, set threshold, test.
+"""PatchCore-style anomaly detection on card-located crops: train on good images, set threshold, test.
 
-Train: features of good images (ResNet18 layer2 + layer3) go into a memory bank.
-Bank: greedy coreset (keeps the 10% of patches that best cover all good variety).
+Locate, then inspect: find the card in each image, crop around it, resize to a fixed size.
+Train: features of good crops (ResNet18 layer2 + layer3) go into a memory bank (greedy coreset).
 Score: for each patch, distance to the nearest good patch. Image score = largest patch distance.
 Threshold: highest score among the threshold images (good only, no peeking at defects).
-Decision: FAIL if the barcode doesn't read OR the score is above the threshold.
+Decision: FAIL if no card, OR the barcode doesn't read, OR the score is above the threshold.
 """
 import csv
 import time
@@ -18,16 +18,16 @@ import torch.nn.functional as F
 import torchvision
 import zxingcpp
 
-from config import ROI
+from locate import card_crop
 
 RAW = Path("data/raw")
 HEAT = Path("data/processed/heatmaps")
 HEAT.mkdir(parents=True, exist_ok=True)
 Path("models").mkdir(exist_ok=True)
-SIZE = (320, 280)  # model input: width, height (keeps the ROI's shape)
+SIZE = (320, 280)  # model input: width, height (about the card's shape)
 BANK_KEEP = 0.10   # keep 10% of good patches in the memory bank
+NO_CARD_SCORE = 99.0
 torch.manual_seed(0)
-y0, y1, x0, x1 = ROI
 
 net = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.IMAGENET1K_V1).eval()
 MEAN = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
@@ -35,8 +35,7 @@ STD = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
 
 
 def load_crop(file):
-    img = cv2.imread(str(RAW / file), cv2.IMREAD_GRAYSCALE)
-    return img[y0:y1, x0:x1]
+    return card_crop(cv2.imread(str(RAW / file), cv2.IMREAD_GRAYSCALE))
 
 
 @torch.no_grad()
@@ -81,30 +80,32 @@ by_split = defaultdict(list)
 for r in rows:
     by_split[r["split"]].append(r)
 
-# 1. Train: build the memory bank from good train images
+# 1. Train: build the memory bank from good train crops
 t0 = time.perf_counter()
 all_feats = torch.cat([features(load_crop(r["file"]))[0] for r in by_split["train"]])
 bank = greedy_coreset(all_feats, int(len(all_feats) * BANK_KEEP))
 print(f"Trained on {len(by_split['train'])} images, bank {len(bank)} of {len(all_feats)} patches "
-      f"(greedy coreset), {time.perf_counter() - t0:.1f} s")
+      f"(greedy coreset, card crops), {time.perf_counter() - t0:.1f} s")
 
-# 2. Threshold: highest score among good threshold images
+# 2. Threshold: highest score among good threshold crops
 thr_scores = [patch_scores(features(load_crop(r["file"]))[0], bank).max().item()
               for r in by_split["threshold"]]
-thr_auto = max(thr_scores)
-thr = 2.16  # commissioned: midpoint of highest good (2.129) and lowest defect (2.198)
-print(f"Threshold scores: min {min(thr_scores):.3f}, max {thr_auto:.3f} (auto)  ->  commissioned threshold {thr:.3f}")
-torch.save({"bank": bank, "threshold": thr, "size": SIZE, "roi": ROI}, "models/patchcore.pt")
+thr = max(thr_scores)
+print(f"Threshold scores: min {min(thr_scores):.3f}, max {thr:.3f}  ->  threshold {thr:.3f}")
+torch.save({"bank": bank, "threshold": thr, "size": SIZE, "crop": "card"}, "models/patchcore.pt")
 
 # 3. Test
 results, ms = [], []
 for r in by_split["test"]:
-    crop = load_crop(r["file"])
     start = time.perf_counter()
-    feat, (h, w) = features(crop)
-    ps = patch_scores(feat, bank)
-    score = ps.max().item()
-    text = read_barcode(crop)
+    crop = load_crop(r["file"])
+    if crop is None:
+        score, text = NO_CARD_SCORE, "NO CARD"
+    else:
+        feat, (h, w) = features(crop)
+        ps = patch_scores(feat, bank)
+        score = ps.max().item()
+        text = read_barcode(crop)
     ms.append((time.perf_counter() - start) * 1000)
 
     read_ok = text == r["label_id"]
@@ -113,11 +114,12 @@ for r in by_split["test"]:
     results.append({**r, "score": round(score, 3), "read": text,
                     "reader_fail": int(not read_ok), "model_fail": int(model_fail), "fail": int(fail)})
 
-    pmap = cv2.resize(ps.reshape(h, w).numpy(), (crop.shape[1], crop.shape[0]))
-    norm = np.clip(pmap / (2 * thr) * 255, 0, 255).astype(np.uint8)
-    over = cv2.addWeighted(cv2.cvtColor(crop, cv2.COLOR_GRAY2BGR), 0.6,
-                           cv2.applyColorMap(norm, cv2.COLORMAP_JET), 0.4, 0)
-    cv2.imwrite(str(HEAT / f"{r['class']}_{Path(r['file']).stem}.jpg"), over)
+    if crop is not None:
+        pmap = cv2.resize(ps.reshape(h, w).numpy(), (crop.shape[1], crop.shape[0]))
+        norm = np.clip(pmap / (2 * thr) * 255, 0, 255).astype(np.uint8)
+        over = cv2.addWeighted(cv2.cvtColor(crop, cv2.COLOR_GRAY2BGR), 0.6,
+                               cv2.applyColorMap(norm, cv2.COLORMAP_JET), 0.4, 0)
+        cv2.imwrite(str(HEAT / f"{r['class']}_{Path(r['file']).stem}.jpg"), over)
 
 with open("data/processed/results.csv", "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=list(results[0].keys()))
@@ -137,4 +139,4 @@ good = [r for r in results if r["defect"] == "0"]
 bad = [r for r in results if r["defect"] == "1"]
 print(f"\nFalse reject rate (good flagged): {sum(r['fail'] for r in good)}/{len(good)}")
 print(f"Detection rate (defects flagged): {sum(r['fail'] for r in bad)}/{len(bad)}")
-print(f"Average time per image (model + barcode): {sum(ms) / len(ms):.0f} ms")
+print(f"Average time per image (locate + model + barcode): {sum(ms) / len(ms):.0f} ms")
