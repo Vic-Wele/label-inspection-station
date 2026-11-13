@@ -21,3 +21,5 @@ data/processed/*
 Thumbs.db
 .vscode/
 plc/**/build/
+data/fat/
+data/live/
