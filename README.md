@@ -7,6 +7,8 @@ A small parcel label inspection station developed to demonstrate the full vision
 
 ![Label Inspection Station](media/station.jpg)
 
+![Demo](media/demo.gif)
+
 A label card is placed on a parcel beneath an overhead camera. Once the operator's hands leave the inspection area, a break-beam sensor triggers an inspection. The vision system evaluates the label, communicates the result to a PLC, and indicates pass or fail using a green/red stack light.
 
 ---
