@@ -1,152 +1,226 @@
-Camera Setup
+# Camera Setup
 
-Last updated: November 12, 2026
+*Current setup as of November 12, 2026.*
 
-This document describes the current camera hardware, configuration, lighting requirements, calibration procedure, and test results used for image capture and inspection.
+---
 
-Hardware & Physical Setup
-Component	Configuration
-Camera	Logitech C615
-Connection	USB through a hub
-Camera Index	1
-Resolution	1920 × 1080
-Format	MJPG
-Backend	DirectShow
-Mount	Boom-arm tripod, pointing straight down
-Lighting	Heyday LED bar on a separate tripod, positioned upper left
-Image Scale	Approximately 9 px/mm
-Station Requirements
-Ceiling light must remain OFF during image capture and live inspection.
-Heyday LED brightness must match the training images.
-Camera and light positions should remain fixed after calibration.
-Camera Configuration
+## Hardware
 
-The following settings are configured in src/config.py.
+### Camera
+- **Model:** Logitech C615
+- **Connection:** USB (through a hub)
+- **Camera Index:** 1
+- **Resolution:** 1920 × 1080
+- **Format:** MJPG
+- **Backend:** DirectShow
 
-Setting	Value	Reason
-Autofocus	Off	Prevents focus drift.
-Focus	85	Sharpest setting at label height. The camera adjusts focus in steps of 17; a requested value of 90 rounds to 85.
-Auto Exposure	Off	Prevents brightness changes between parts.
-Exposure	-6	Brightest setting with 0% clipping and a safe margin.
-Auto White Balance	Off	Maintains a fixed image response.
-White Balance	4000	Fixed setting; color is irrelevant with saturation set to 0.
-Brightness	128	Driver default.
-Contrast	32	Driver default.
-Saturation	0	Grayscale images; labels are black and white.
-Sharpness	22	Driver default; produces clean edges without halos.
-Gain	28	Driver default.
-Backlight Compensation	0	Disabled to prevent automatic scene adjustments.
+### Mount
+- Boom-arm tripod
+- Pointing straight down
 
-Additional driver setting (not configured in src/config.py):
+### Lighting
+- Heyday LED bar on its own tripod
+- Positioned upper-left of the station
+- Dimmed to match the training images
 
-Low Light Compensation: OFF
-Applying Camera Settings
+### Station Rules
+- Keep the **ceiling light OFF** during captures and live runs
 
-Run the following command to apply all camera settings and perform a self-check:
+### Scale
+- Approximately **9 px/mm**
 
-bash
+---
+
+## Locked Camera Settings (`src/config.py`)
+
+| Setting | Value | Reason |
+|----------|---------|---------|
+| Autofocus | Off | Autofocus drifts |
+| Focus | 85 | Sharpest at label height. Camera moves focus in steps of 17, so 90 rounds to 85 |
+| Auto Exposure | Off | Prevents brightness changes between parts |
+| Exposure | -6 | Brightest setting with 0% clipping and a safe margin |
+| Auto White Balance | Off | Fixed response |
+| White Balance | 4000 | Color doesn't matter with saturation set to 0 |
+| Brightness | 128 | Driver default; sweep performed at this value |
+| Contrast | 32 | Driver default; sweep performed at this value |
+| Saturation | 0 | Grayscale; labels are black and white |
+| Sharpness | 22 | Driver default; clean edges without halos |
+| Gain | 28 | Driver default; sweep performed at this value |
+| Backlight Compensation | 0 | Counts as an automatic adjustment |
+
+### Driver Settings (Not Controlled by `config.py`)
+
+| Setting | Value |
+|----------|---------|
+| Low Light Compensation | OFF |
+
+---
+
+## Startup Validation
+
+Run:
+
+```bash
 python src/camera.py
+```
 
+This:
 
-The self-check passes after unplugging and reconnecting the camera.
+- Applies all configured camera settings
+- Performs a camera self-check
 
-Lighting & Brightness Calibration
+Expected result:
 
-Before each run, verify image brightness using the reference card.
+✅ Self-check passes, even after unplugging and reconnecting the camera.
 
-Reference conditions:
+---
 
-Card 1 positioned in the dip.
-Ceiling light OFF.
-Camera and light in their calibrated positions.
+## Brightness Reference
 
-Run the brightness check:
+Before every run:
 
-bash
+1. Place **Card 1** in the dip.
+2. Verify the ceiling light is **OFF**.
+3. Run:
+
+```bash
 python src/light_check.py
+```
 
-Expected Brightness
-Measurement	Expected Value
-Target brightness	94
-Acceptable range	90–99
+### Expected Brightness
 
-If brightness falls outside this range, adjust the Heyday LED brightness, not the camera settings.
+Whole-image brightness should be approximately:
 
-Calibration Notes
+```text
+94
+```
 
-The camera self-check cannot detect physical movement of the camera or light.
+Acceptable range:
 
-The brightness check detects changes in lighting.
-The card locator compensates for small camera position shifts.
+```text
+90 - 99
+```
 
-Both checks are important for maintaining consistent inspection results.
+If brightness is outside this range:
 
-Image Processing
+✅ Adjust the **Heyday light**
 
-The inspection pipeline does not use a fixed image crop.
+❌ Do NOT adjust camera settings
 
-Instead, it:
+### Why This Check Exists
 
-Locates the inspection card.
-Measures the card's tilt.
-Corrects the image orientation.
-Crops the image around the detected card.
-Reads the barcode from the resulting crop without zooming.
+The camera self-check cannot detect:
 
-Implementation: src/locate.py
+- A moved camera
+- A moved light
 
-This approach makes inspection more tolerant of small camera position changes.
+The brightness check verifies lighting consistency, while the card locator compensates for small camera shifts.
 
-Test Results
-Exposure Sweep
+---
 
-The exposure sweep was performed during the initial setup under the following conditions:
+## Image Processing Workflow
 
-Heyday LED at full brightness.
-Room lights OFF.
-Brightness, contrast, and gain held at their configured values.
-Exposure	Label Brightness	Clipped Pixels	Barcode
--2	237.7	73.0%	No Read
--3	227.4	67.7%	Read
--4	211.9	55.0%	Read
--5	185.5	0.0%	Read
--6	139.9	0.0%	Read (Selected)
--7	96.1	0.0%	Read
--8	70.6	0.0%	Read
--9	50.2	0.0%	Read
--10	36.2	0.0%	Read
--11	28.4	0.0%	No Read
+Inspection does **not** use a fixed crop.
 
-Selected exposure: -6
+The system:
 
-This setting provides sufficient image brightness with no clipped pixels and a safe margin against overexposure.
+1. Locates the card
+2. Measures card tilt
+3. Straightens the image
+4. Crops around the card
+5. Reads the barcode from the corrected crop
 
-Additional Tests
-Test	Result
-Ceiling light ON	Brightness increased by 4.6% (within the 5% limit).
-Barcode recognition	76/76 good images successfully read (100%).
+Implementation:
 
-Although the ceiling light test remained within the acceptable 5% variation, the station requirement remains ceiling light OFF during all captures and live runs.
+```text
+src/locate.py
+```
 
-Setup History & Lessons Learned
-Previous Setup
-Initially used a USB ring light.
-Later switched to the Heyday LED at full brightness.
-Image inspection originally relied on a fixed region of interest (ROI).
-Camera & Lighting Shift
+No barcode zoom is used.
 
-The camera was accidentally bumped, and the light was moved, resulting in a 26% increase in image brightness.
+---
 
-The following changes were made:
+## Test Results
 
-Dimmed the Heyday LED to restore the original brightness.
-Replaced the fixed ROI approach with card detection and automatic cropping.
-Improved tolerance to small camera position changes.
-Lessons Learned
-Mark camera and light positions using tape on the table or tripod.
-Avoid changing camera settings after calibration.
-Verify brightness before running inspections.
-Keep lighting consistent with the training images.
-Use card detection instead of relying on a fixed image region.
+### Exposure Sweep
 
-Important: Consistent camera positioning, fixed camera settings, and controlled lighting are essential for reliable image capture and barcode inspection.
+Conditions:
+
+- Initial setup
+- Heyday light at full brightness
+- Room lights off
+
+| Exposure | Label Brightness | Clipped % | Barcode Result |
+|-----------|-----------------|-----------|----------------|
+| -2 | 237.7 | 73.0 | ❌ No Read |
+| -3 | 227.4 | 67.7 | ✅ Read |
+| -4 | 211.9 | 55.0 | ✅ Read |
+| -5 | 185.5 | 0.0 | ✅ Read |
+| **-6** | **139.9** | **0.0** | ✅ **Selected** |
+| -7 | 96.1 | 0.0 | ✅ Read |
+| -8 | 70.6 | 0.0 | ✅ Read |
+| -9 | 50.2 | 0.0 | ✅ Read |
+| -10 | 36.2 | 0.0 | ✅ Read |
+| -11 | 28.4 | 0.0 | ❌ No Read |
+
+### Room Light Test
+
+Turning the ceiling light on changed brightness by:
+
+```text
+4.6%
+```
+
+This is below the 5% limit.
+
+Operational rule remains:
+
+> Keep the ceiling light OFF during capture and live operation.
+
+### Barcode Validation
+
+- Barcode read without zoom: **76 / 76**
+- Success rate: **100%**
+
+---
+
+## Change History
+
+### Original Setup
+
+- USB ring light
+- Fixed ROI (Region of Interest)
+
+### Issue Encountered
+
+At one point:
+
+- Camera position changed
+- Light position changed
+- Brightness increased by approximately **26%**
+
+### Fix Implemented
+
+- Dimmed the Heyday light to match the original setup
+- Replaced fixed ROI processing with card localization and alignment
+
+### Lesson Learned
+
+Mark both the camera and light locations with tape or physical alignment marks.
+
+This allows the station to be restored quickly after accidental movement.
+
+---
+
+## Operational Checklist
+
+Before running inspection:
+
+- [ ] Camera in marked position
+- [ ] Light in marked position
+- [ ] Ceiling light OFF
+- [ ] Card 1 in the dip
+- [ ] `python src/light_check.py` reports brightness between 90 and 99
+- [ ] `python src/camera.py` self-check passes
+
+When all checks pass, the station is ready for operation.
