@@ -1,110 +1,231 @@
-# \# PLC I/O Map and Wiring
+# PLC I/O Map and Wiring
 
-# 
+---
 
-# \## PLC I/O (OpenPLC on Arduino Uno)
+## PLC Configuration
 
-# 
+### Platform
 
-# | Arduino pin | Type | PLC address | Modbus | Alias | Variable | Meaning |
+- **PLC Runtime:** OpenPLC
+- **Controller:** Arduino Uno
+- **Communication:** Modbus RTU over USB Serial
 
-# | --- | --- | --- | --- | --- | --- | --- |
+---
 
-# | 2 | Digital input | %IX0.0 | Discrete input 0 (read) | BEAM\_SENSOR | beam\_clear | TRUE = beam clear, FALSE = hand in beam |
+## PLC I/O Mapping
 
-# | 13 | Digital output | %QX0.0 | Coil 0 (written by laptop) | LED\_TEST | fail\_flag | Laptop result: FAIL (on-board amber LED shows it) |
+| Arduino Pin | Type | PLC Address | Modbus Address | Alias | Variable | Description |
+|-------------|------|-------------|----------------|--------|----------|-------------|
+| 2 | Digital Input | `%IX0.0` | Discrete Input 0 (read) | `BEAM_SENSOR` | `beam_clear` | `TRUE` = beam clear, `FALSE` = hand in beam |
+| 13 | Digital Output | `%QX0.0` | Coil 0 | `LED_TEST` | `fail_flag` | FAIL result from laptop (shown on onboard LED) |
+| 7 | Digital Output | `%QX0.1` | Coil 1 | `GREEN_LIGHT` | `green_out` | Green stack light output |
+| 8 | Digital Output | `%QX0.2` | Coil 2 | `RED_LIGHT` | `red_out` | Red stack light output |
+| 12 | Digital Output | `%QX0.3` | Coil 3 | - | `pass_flag` | PASS result from laptop (not wired externally) |
 
-# | 7 | Digital output | %QX0.1 | Coil 1 | GREEN\_LIGHT | green\_out | Green stack light |
+### Arduino Uno OpenPLC Layout
 
-# | 8 | Digital output | %QX0.2 | Coil 2 | RED\_LIGHT | red\_out | Red stack light |
+The standard OpenPLC mapping for an Arduino Uno is:
 
-# | 12 | Digital output | %QX0.3 | Coil 3 (written by laptop) | - | pass\_flag | Laptop result: PASS (nothing wired to pin 12) |
+#### Inputs
 
-# 
+| Pins |
+|------|
+| 2, 3, 4, 5, 6 |
 
-# Note: in OpenPLC's standard Uno layout, digital inputs are pins 2 to 6 and digital outputs are pins 7, 8, 12 and 13. Pin 12 cannot be used as an input.
+#### Outputs
 
-# 
+| Pins |
+|------|
+| 7, 8, 12, 13 |
 
-# \## Ladder logic (current)
+> **Important:** Pin 12 is configured as an output and cannot be used as an input.
 
-# 
+---
 
-# | Rung | Logic |
+## Ladder Logic
 
-# | --- | --- |
+### Current Logic
 
-# | 1 | beam\_clear AND pass\_flag -> green\_out |
+| Rung | Logic |
+|--------|--------|
+| 1 | `beam_clear AND pass_flag → green_out` |
+| 2 | `beam_clear AND fail_flag → red_out` |
 
-# | 2 | beam\_clear AND fail\_flag -> red\_out |
+### Behavior
 
-# 
+- When the beam is clear and the inspection passes, the green light turns on.
+- When the beam is clear and the inspection fails, the red light turns on.
+- While the operator is loading a part and blocking the beam, both lights remain off.
 
-# So the light shows the laptop's result only when the operator's hand is out of the beam. While loading, both lights are off.
+---
 
-# 
+## Communication (Laptop ↔ PLC)
 
-# \## Communication (laptop <-> PLC)
+| Setting | Value |
+|----------|---------|
+| Protocol | Modbus RTU over USB Serial |
+| PLC Role | Slave (Server) |
+| Laptop Role | Master (Client) |
+| Port | COM4 |
+| Baud Rate | 115200 |
+| Serial Format | 8N1 |
+| Slave ID | 1 |
+| OpenPLC Requirement | Modbus Server must be added and enabled |
 
-# 
+### OpenPLC Requirement
 
-# | Setting | Value |
+The Modbus Server must be **enabled** in OpenPLC.
 
-# | --- | --- |
+Without it, every request returns:
 
-# | Protocol | Modbus RTU over USB serial, PLC is the slave (server), laptop is the master (client) |
+```text
+Exception 1 - Illegal Function
+```
 
-# | Port / speed | COM4, 115200 baud, 8N1, slave ID 1 |
+### Reads
 
-# | OpenPLC setup | Servers -> Modbus server added and \*\*enabled\*\* (without it, every request returns exception 1, Illegal Function) |
+The laptop continuously polls:
 
-# | Laptop reads | Function 2, discrete input 0 (beam\_clear), polled every loop |
+| Function | Address | Signal |
+|-----------|---------|---------|
+| Function 2 | Discrete Input 0 | `beam_clear` |
 
-# | Laptop writes | Function 15, coils 0 to 3 in one message: \[fail\_flag, False, False, pass\_flag] |
+### Writes
 
-# 
+The laptop writes all output coils in a single packet using Function 15:
 
-# Coils 1 and 2 (green/red outputs) are rewritten by the ladder every 20 ms scan, so the laptop's False values there have no effect.
+```python
+[fail_flag, False, False, pass_flag]
+```
 
-# 
+Corresponding coil assignments:
 
-# \## Breadboard wiring
+| Coil | Purpose |
+|--------|---------|
+| 0 | `fail_flag` |
+| 1 | Green output (overridden by ladder logic) |
+| 2 | Red output (overridden by ladder logic) |
+| 3 | `pass_flag` |
 
-# 
+### Important Note
 
-# | Item | From | To |
+Coils 1 and 2 are rewritten by the PLC ladder logic on every scan (approximately every 20 ms).
 
-# | --- | --- | --- |
+As a result, the laptop's values for those coils have no effect.
 
-# | 5V supply | Arduino 5V | + rail, row 27 |
+---
 
-# | Ground | Arduino GND (next to pin 13) | - rail, row 15 |
+## Breadboard Wiring
 
-# | Green light | Pin 7 | Row 10a, 220 ohm (10c to 14c), green LED (long leg 14a, short leg - rail) |
+### Power Distribution
 
-# | Red light | Pin 8 | Row 20a, 220 ohm (20c to 24c), red LED (long leg 24a, short leg - rail) |
+| Signal | From | To |
+|----------|------|------|
+| 5V Supply | Arduino 5V | Breadboard positive rail, row 27 |
+| Ground | Arduino GND (next to pin 13) | Breadboard negative rail, row 15 |
 
-# | Emitter | Red / black | + rail / - rail, row 29 |
+### Indicator Lights
 
-# | Receiver power | Red / black | + rail / - rail, row 25 |
+| Device | From | To |
+|----------|------|------|
+| Green Light | Pin 7 | Row 10a → 220 Ω resistor (10c–14c) → Green LED (long leg 14a, short leg to GND rail) |
+| Red Light | Pin 8 | Row 20a → 220 Ω resistor (20c–24c) → Red LED (long leg 24a, short leg to GND rail) |
 
-# | Receiver signal | White | Row 28a |
+### Break-Beam Sensor
 
-# | PLC input | Pin 2 | Row 28d |
+| Connection | Wire Color | Destination |
+|-------------|------------|------------|
+| Emitter Power | Red / Black | Positive rail / Negative rail (row 29) |
+| Receiver Power | Red / Black | Positive rail / Negative rail (row 25) |
+| Receiver Signal | White | Row 28a |
+| PLC Input | Pin 2 | Row 28d |
 
-# 
+---
 
-# \## Commissioning notes
+## Commissioning Notes
 
-# 
+### Sensor Behavior
 
-# \- The break-beam sensor received was a different model than designed for. It drives its own output, so no external pull-up is used. An extra 10 kOhm pull-up prevented the signal from going low.
+The received break-beam sensor differed from the originally designed model.
 
-# \- Fault isolation steps used: emitter checked with a phone camera (infrared visible), PLC input checked by forcing row 28 to ground, then the pull-up was removed.
+Because the sensor actively drives its output:
 
-# \- Modbus first returned Illegal Function for every request. A reply with an error code meant cable, speed and slave ID were fine; the fix was enabling the Modbus server in OpenPLC.
+- No external pull-up resistor is required.
+- A 10 kΩ pull-up resistor prevented the signal from going low.
+- The pull-up resistor was removed.
 
-# \- After any program change, the program must be built and uploaded to the Arduino.
+### Fault Isolation Procedure
 
-# \- The laptop has one USB port; a USB hub connects both the camera and the Arduino.
+The following troubleshooting sequence was used:
 
+1. Verify the emitter using a phone camera (infrared is visible).
+2. Verify the PLC input by forcing row 28 to ground.
+3. Remove the pull-up resistor after confirming the sensor's output behavior.
+
+### Modbus Troubleshooting
+
+Initially, every Modbus request returned:
+
+```text
+Illegal Function
+```
+
+This indicated that:
+
+- USB communication was working.
+- The baud rate was correct.
+- The slave ID was correct.
+
+The actual problem was:
+
+- The Modbus Server was not enabled in OpenPLC.
+
+Once enabled, communication worked normally.
+
+### Program Deployment
+
+After any ladder logic or PLC program modification:
+
+1. Build the OpenPLC project.
+2. Upload the updated program to the Arduino.
+
+Changes do not take effect until the upload is completed.
+
+### USB Connections
+
+The laptop has only one USB port.
+
+A USB hub is used to connect:
+
+- The inspection camera
+- The Arduino PLC
+
+simultaneously.
+
+---
+
+## Operational Summary
+
+### Inputs
+
+| Signal | Source |
+|----------|---------|
+| `beam_clear` | Break-beam sensor |
+
+### Outputs
+
+| Signal | Device |
+|----------|---------|
+| `green_out` | Green stack light |
+| `red_out` | Red stack light |
+| `pass_flag` | Internal PLC flag |
+| `fail_flag` | Internal PLC flag / onboard LED |
+
+### Operator Behavior
+
+| Beam State | Inspection Result | Light Output |
+|------------|------------------|--------------|
+| Blocked | Pass | Off |
+| Blocked | Fail | Off |
+| Clear | Pass | Green |
+| Clear | Fail | Red |
