@@ -1,53 +1,51 @@
-# Label Inspection Station: System Architecture
+# System Architecture
 
-## Block diagram
+## Overview
 
 ```mermaid
 flowchart LR
-    Box["Box placed in nest"] --> Beam["IR break-beam sensor"]
-    Beam -->|"Digital input: part present"| PLC["PLC (Arduino, ladder logic)"]
-    PLC -->|"Modbus RTU over USB: trigger"| PC["Vision PC (laptop)"]
-    Cam["USB camera + ring light"] -->|"Image"| PC
-    PC -->|"Modbus RTU over USB: pass/fail"| PLC
-    PLC -->|"Servo + LED outputs"| Servo["Reject flag + red/green stack light"]
+    Op["Operator places card"] --> Beam["Break-beam sensor"]
+    Beam -->|"Pin 2, %IX0.0"| PLC["PLC: Arduino Uno + OpenPLC ladder"]
+    PLC <-->|"Modbus RTU over USB: beam in, PASS/FAIL coils out"| PC["Vision PC: laptop"]
+    Cam["Logitech C615 + Heyday LED bar"] -->|"Image"| PC
+    PC -->|"Pins 7 and 8"| PLC
+    PLC -->|"Pins 7 and 8"| Light["Green / red stack light"]
     PC --> Log["Results log + images"]
-    Log --> Drive["Google Drive backup"]
-    Log --> Train["Model training (laptop)"]
-    Train -->|"Trained model"| PC
-    PC --> Dash["Live dashboard"]
+    Log --> Train["Model training on laptop"]
+    Train -->|"Model"| PC
 ```
 
-## Signal flow for one box
+## How one inspection works
 
-1. The operator places the box in the nest. The nest holds every box in the same position.
-2. The box breaks the IR beam. The PLC sets a **trigger** flag.
-3. The vision PC reads the flag over Modbus and takes a picture.
-4. The vision PC runs the checks and the AI model, then reads the barcode.
-5. The vision PC writes **pass** or **fail** back to the PLC.
-6. On fail, the PLC raises the reject flag and turns on the red light. On pass, it turns on the green light.
-7. The result, image and timing are logged and shown on the dashboard.
+1. The operator's hand breaks the beam while placing a card. The laptop reads `beam_clear` over Modbus and clears the result coils, so both lights go off ("loading").
+2. The hand leaves: the beam is clear **and** the image has been still for 0.5 s (motion check). This is the trigger.
+3. The laptop inspects the current frame (`src/inspector.py`):
+   - Locate the card. No card -> FAIL (missing label).
+   - Measure its tilt. Above 3 deg -> FAIL (skewed).
+   - Straighten and crop the card.
+   - Read the Code 128 barcode. No read -> FAIL.
+   - Anomaly model score above the threshold -> FAIL (torn, smudged, faded, scratched).
+4. The laptop writes the result to the PLC in one Modbus message (coils 0 to 3).
+5. The ladder turns on green (pass) or red (fail), only while the beam is clear.
+6. The image, result, reason, score, tilt and cycle time are logged.
 
-## Design decisions
+Measured cycle time (trigger to light): mean 176 ms, max 266 ms. Budget: 500 ms.
 
-| Decision | Choice | Reason |
+## Design choices
+
+| Choice | Why |
+| --- | --- |
+| Locate, then inspect | A fixed crop broke when the camera was bumped; finding the card first makes the station tolerant to small shifts |
+| Rule for skew, model for appearance | Tilt can be measured exactly; tears and smudges can't be listed in advance |
+| Anomaly detection (PatchCore-style) | Trains on good parts only; catches defects never seen before |
+| Threshold from good images only | No peeking at defects; honest false-reject numbers |
+| Laptop reads the beam, PLC drives the light | The PLC keeps control of the outputs; the vision PC only supplies the result |
+
+## This project vs a real SICK installation
+
+| This project | Role | Real installation |
 | --- | --- | --- |
-| Part handling | Fixed nest | Same position every time, so the model can be simpler and more accurate |
-| Model | ResNet18 features + nearest-good-image distance (PatchCore-style anomaly detection) | Small, fast on CPU (about 40 ms per image), no heavy libraries |
-| Training | On the laptop | Takes under a minute; fewer moving parts than cloud training |
-| PLC | Arduino running ladder logic (to be confirmed in Phase 6) | Real PLC programming without extra software layers |
-| Communication | Modbus RTU over the USB cable | Standard industrial protocol, no network setup |
-
-## Components and their industrial equivalents
-
-| This project | Role | Real installation (SICK or typical) |
-| --- | --- | --- |
-| Logitech USB webcam + ring light + laptop software | Image capture and inspection | SICK InspectorP6xx or Inspector83x vision sensor running SICK Nova |
-| Cardboard nest | Holds the part in a fixed position | Machined part fixture or nest |
-| IR break-beam sensor | Part-present trigger | SICK through-beam photoelectric sensor |
-| zxing-cpp barcode reading | Code 128 reading | SICK Lector image-based code reader |
-| Arduino with ladder logic | Machine control | Customer PLC (for example Rockwell or Siemens) |
-| Modbus RTU | PLC communication | EtherNet/IP or PROFINET |
-| Training on the laptop | Model training | SICK dStudio (cloud training at scale) |
-| Model running on the laptop | Inference at the edge | AI inference running on the SICK sensor |
-| Servo reject flag + red/green LEDs | Signals a rejected parcel | Stack light at the station, diverter downstream |
-| Streamlit dashboard | Monitoring | Plant dashboard via OPC UA or MQTT |
+| Logitech C615 + LED bar + laptop software | Image capture and inspection | SICK Inspector or a SIM with cameras, running SICK Nova / AppSpace |
+| Contour-based card locator | Find the part before inspecting | Part locator / fixture tool in the vision sensor |
+| zxing-cpp barcode reading | Code 128 reading | SICK Lector code reader |
+| PatchCore model trained on the laptop | Anomaly detection | SICK dStudio (training) + edge inference on the

@@ -10,7 +10,7 @@ Automatically inspect shipping labels on parcels, flag defective parcels, and lo
 - One camera inspection station with controlled lighting
 - Defect detection with rule-based checks and an AI model
 - Barcode reading (Code 128)
-- Pass/fail signal to a PLC, which drives a reject flag and a red/green stack light
+- Pass/fail signal to a PLC over Modbus RTU, which drives a red/green stack light
 - Logging and a live dashboard
 
 **Excluded**
@@ -40,7 +40,7 @@ Automatically inspect shipping labels on parcels, flag defective parcels, and lo
 | REQ-08 | Barcode read rate | At least 99% on good labels | FAT: count successful reads |
 | REQ-09 | Cycle time | Result in under 500 ms after the trigger | Log timestamps for every parcel |
 | REQ-10 | Station readiness | Ready for the next parcel within 2 seconds of the previous trigger | Log timestamps for every parcel |
-| REQ-11 | PLC output | On fail: reject flag raised and red light on. On pass: green light on. | Check flag and lights on every parcel |
+| REQ-11 | PLC output | On fail: red light on. On pass: green light on. Lights off while the operator's hand is in the beam. | Check lights on every parcel |
 | REQ-12 | Logging | Every inspection saved with image, result, confidence and time | Check log matches the FAT count |
 
 ## 5. Assumptions
